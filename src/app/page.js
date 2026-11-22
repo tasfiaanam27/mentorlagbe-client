@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import Navbar from "@/components/shared/Navbar";
 import Footer from "@/components/shared/Footer";
+import FeaturedTuitions from "@/components/home/FeaturedTuitions";
 
 const benefits = [
   {
@@ -142,6 +143,8 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
+        <FeaturedTuitions />
 
         {/* Benefits Section */}
         <section className="py-20 lg:py-24 bg-[#FAF8F5]">
