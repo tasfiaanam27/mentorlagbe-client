@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, GraduationCap, UserRound } from "lucide-react";
@@ -20,6 +21,82 @@ export default function SignUpPage() {
 
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // Safely retrieve the intended destination.
+  const getSafeRedirectPath = () => {
+    const params = new URLSearchParams(window.location.search);
+    const callbackURL = params.get("callbackURL");
+
+    if (!callbackURL) return "/";
+
+    try {
+      const destination = new URL(callbackURL, window.location.origin);
+
+      if (
+        destination.origin !== window.location.origin ||
+        !callbackURL.startsWith("/") ||
+        callbackURL.startsWith("//") ||
+        callbackURL.includes("\\")
+      ) {
+        return "/";
+      }
+
+      return (
+        destination.pathname +
+        destination.search +
+        destination.hash
+      );
+    } catch {
+      return "/";
+    }
+  };
+
+  // Preselect the role requested on the pricing page.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    let requestedRole = params.get("role");
+
+    if (!["student", "tutor"].includes(requestedRole)) {
+      const redirectPath = getSafeRedirectPath();
+      const destination = new URL(
+        redirectPath,
+        window.location.origin
+      );
+
+      requestedRole = destination.searchParams.get("role");
+    }
+
+    if (["student", "tutor"].includes(requestedRole)) {
+      setFormData((previous) => ({
+        ...previous,
+        role: requestedRole,
+      }));
+    }
+  }, []);
+
+  // Keep the pricing page role consistent with the new account.
+  const getRedirectPathForRole = () => {
+    const redirectPath = getSafeRedirectPath();
+
+    if (redirectPath === "/") return "/";
+
+    const destination = new URL(
+      redirectPath,
+      window.location.origin
+    );
+
+    if (destination.pathname === "/pricing") {
+      destination.searchParams.set("role", formData.role);
+
+      return (
+        destination.pathname +
+        destination.search +
+        destination.hash
+      );
+    }
+
+    return redirectPath;
+  };
 
   const handleChange = (e) => {
     setFormData({
@@ -57,25 +134,38 @@ export default function SignUpPage() {
     setLoading(true);
 
     try {
+      const redirectPath = getRedirectPathForRole();
+
       const result = await authClient.signUp.email({
         name,
         email,
         password: formData.password,
         role: formData.role,
+        callbackURL: redirectPath,
       });
 
       if (result.error) {
-        toast.error(result.error.message || "Unable to create account.");
+        toast.error(
+          result.error.message || "Unable to create account."
+        );
         return;
       }
 
-      // Verify that the newly registered user has an active session.
+      // Verify whether BetterAuth created an active session.
       const sessionResult = await authClient.getSession();
       const user = sessionResult.data?.user;
 
       if (!user) {
-        toast.success("Account created successfully! Please sign in.");
-        router.replace("/sign-in");
+        toast.success(
+          "Account created successfully! Please sign in."
+        );
+
+        const signInUrl =
+          redirectPath === "/"
+            ? "/sign-in"
+            : `/sign-in?callbackURL=${encodeURIComponent(redirectPath)}`;
+
+        router.replace(signInUrl);
         return;
       }
 
@@ -86,10 +176,12 @@ export default function SignUpPage() {
         return;
       }
 
-      toast.success("Account created successfully! Welcome to MentorLagbe.");
+      toast.success(
+        "Account created successfully! Welcome to MentorLagbe."
+      );
 
-      // New users land on the public homepage after registration.
-      router.replace("/");
+      // Return the newly registered user to the intended page.
+      router.replace(redirectPath);
       router.refresh();
     } catch (error) {
       toast.error(error.message || "Something went wrong.");
@@ -97,6 +189,13 @@ export default function SignUpPage() {
       setLoading(false);
     }
   };
+
+  const callbackURL = getSafeRedirectPath();
+
+  const signInHref =
+    callbackURL === "/"
+      ? "/sign-in"
+      : `/sign-in?callbackURL=${encodeURIComponent(callbackURL)}`;
 
   return (
     <main className="min-h-screen bg-[#FAF8F5] flex items-center justify-center px-4 py-10">
@@ -110,6 +209,7 @@ export default function SignUpPage() {
             <h1 className="text-3xl font-bold text-[#30213D]">
               Create your account
             </h1>
+
             <p className="text-[#64748B] mt-2 text-sm">
               Join MentorLagbe and start your learning journey.
             </p>
@@ -123,6 +223,7 @@ export default function SignUpPage() {
               >
                 Full Name
               </label>
+
               <input
                 id="name"
                 type="text"
@@ -143,6 +244,7 @@ export default function SignUpPage() {
               >
                 Email Address
               </label>
+
               <input
                 id="email"
                 type="email"
@@ -182,9 +284,15 @@ export default function SignUpPage() {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-[#64748B] hover:text-[#8B78B5]"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-label={
+                    showPassword ? "Hide password" : "Show password"
+                  }
                 >
-                  {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
+                  {showPassword ? (
+                    <EyeOff size={19} />
+                  ) : (
+                    <Eye size={19} />
+                  )}
                 </button>
               </div>
             </div>
@@ -241,7 +349,7 @@ export default function SignUpPage() {
           <p className="text-center text-sm text-[#64748B] mt-6">
             Already have an account?{" "}
             <Link
-              href="/sign-in"
+              href={signInHref}
               className="text-[#8B78B5] font-semibold hover:text-[#75619E]"
             >
               Sign in
@@ -257,3 +365,4 @@ export default function SignUpPage() {
     </main>
   );
 }
+
