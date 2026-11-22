@@ -31,8 +31,26 @@ export default function SignUpPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const name = formData.name.trim();
+    const email = formData.email.trim();
+
+    if (!name || !email || !formData.password) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      toast.error("Please enter a valid email address.");
+      return;
+    }
+
     if (formData.password.length < 8) {
       toast.error("Password must be at least 8 characters long.");
+      return;
+    }
+
+    if (!["student", "tutor"].includes(formData.role)) {
+      toast.error("Please select a valid account role.");
       return;
     }
 
@@ -40,8 +58,8 @@ export default function SignUpPage() {
 
     try {
       const result = await authClient.signUp.email({
-        name: formData.name,
-        email: formData.email,
+        name,
+        email,
         password: formData.password,
         role: formData.role,
       });
@@ -51,12 +69,28 @@ export default function SignUpPage() {
         return;
       }
 
-      toast.success("Account created successfully!");
-
+      // Verify that the newly registered user has an active session.
       const sessionResult = await authClient.getSession();
-      const userRole = sessionResult.data?.user?.role || formData.role;
+      const user = sessionResult.data?.user;
 
-      router.replace(`/dashboard/${userRole}`);
+      if (!user) {
+        toast.success("Account created successfully! Please sign in.");
+        router.replace("/sign-in");
+        return;
+      }
+
+      const validRoles = ["student", "tutor", "admin"];
+
+      if (!validRoles.includes(user.role)) {
+        toast.error("Unable to verify your account role.");
+        return;
+      }
+
+      toast.success("Account created successfully! Welcome to MentorLagbe.");
+
+      // New users land on the public homepage after registration.
+      router.replace("/");
+      router.refresh();
     } catch (error) {
       toast.error(error.message || "Something went wrong.");
     } finally {
@@ -83,42 +117,56 @@ export default function SignUpPage() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-[#30213D] mb-2">
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-[#30213D] mb-2"
+              >
                 Full Name
               </label>
               <input
+                id="name"
                 type="text"
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
                 placeholder="Enter your full name"
                 required
+                autoComplete="name"
                 className="w-full px-4 py-3 rounded-xl border border-[#EAE4EF] bg-white text-[#30213D] outline-none focus:ring-2 focus:ring-[#8B78B5] focus:border-transparent"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[#30213D] mb-2">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-[#30213D] mb-2"
+              >
                 Email Address
               </label>
               <input
+                id="email"
                 type="email"
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="you@example.com"
                 required
+                autoComplete="email"
                 className="w-full px-4 py-3 rounded-xl border border-[#EAE4EF] bg-white text-[#30213D] outline-none focus:ring-2 focus:ring-[#8B78B5] focus:border-transparent"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[#30213D] mb-2">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-[#30213D] mb-2"
+              >
                 Password
               </label>
 
               <div className="relative">
                 <input
+                  id="password"
                   type={showPassword ? "text" : "password"}
                   name="password"
                   value={formData.password}
@@ -126,6 +174,7 @@ export default function SignUpPage() {
                   placeholder="At least 8 characters"
                   minLength={8}
                   required
+                  autoComplete="new-password"
                   className="w-full px-4 py-3 pr-12 rounded-xl border border-[#EAE4EF] bg-white text-[#30213D] outline-none focus:ring-2 focus:ring-[#8B78B5] focus:border-transparent"
                 />
 
@@ -151,6 +200,7 @@ export default function SignUpPage() {
                   onClick={() =>
                     setFormData({ ...formData, role: "student" })
                   }
+                  aria-pressed={formData.role === "student"}
                   className={`flex items-center justify-center gap-2 py-3 rounded-xl border text-sm font-medium transition ${
                     formData.role === "student"
                       ? "border-[#8B78B5] bg-[#F3EFF9] text-[#75619E]"
@@ -166,6 +216,7 @@ export default function SignUpPage() {
                   onClick={() =>
                     setFormData({ ...formData, role: "tutor" })
                   }
+                  aria-pressed={formData.role === "tutor"}
                   className={`flex items-center justify-center gap-2 py-3 rounded-xl border text-sm font-medium transition ${
                     formData.role === "tutor"
                       ? "border-[#8B78B5] bg-[#F3EFF9] text-[#75619E]"

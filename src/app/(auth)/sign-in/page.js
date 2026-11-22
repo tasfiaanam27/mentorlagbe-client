@@ -28,29 +28,49 @@ export default function SignInPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!formData.email.trim() || !formData.password) {
+      toast.error("Please enter your email and password.");
+      return;
+    }
+
     setLoading(true);
 
     try {
       const result = await authClient.signIn.email({
-        email: formData.email,
+        email: formData.email.trim(),
         password: formData.password,
       });
 
       if (result.error) {
-        toast.error(result.error.message || "Invalid email or password.");
+        toast.error(
+          result.error.message || "Invalid email or password."
+        );
         return;
       }
 
+      // Confirm that the authenticated session is available.
       const sessionResult = await authClient.getSession();
-      const userRole = sessionResult.data?.user?.role;
+      const user = sessionResult.data?.user;
 
-      if (!userRole) {
+      if (!user) {
         toast.error("Unable to retrieve your account information.");
         return;
       }
 
+      // Ensure the account has a valid MentorLagbe role.
+      const validRoles = ["student", "tutor", "admin"];
+
+      if (!validRoles.includes(user.role)) {
+        toast.error("Your account role is invalid. Please contact support.");
+        return;
+      }
+
       toast.success("Welcome back!");
-      router.replace(`/dashboard/${userRole}`);
+
+      // Successful sign-in takes the user to the public homepage.
+      router.replace("/");
+      router.refresh();
     } catch (error) {
       toast.error(error.message || "Something went wrong.");
     } finally {
@@ -70,6 +90,7 @@ export default function SignInPage() {
             <h1 className="text-3xl font-bold text-[#30213D]">
               Welcome back!
             </h1>
+
             <p className="text-[#64748B] mt-2 text-sm">
               Sign in to continue to your MentorLagbe account.
             </p>
@@ -77,24 +98,32 @@ export default function SignInPage() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-[#30213D] mb-2">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-[#30213D] mb-2"
+              >
                 Email Address
               </label>
 
               <input
+                id="email"
                 type="email"
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="you@example.com"
                 required
+                autoComplete="email"
                 className="w-full px-4 py-3 rounded-xl border border-[#EAE4EF] bg-white text-[#30213D] outline-none focus:ring-2 focus:ring-[#8B78B5] focus:border-transparent"
               />
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm font-medium text-[#30213D]">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-[#30213D]"
+                >
                   Password
                 </label>
 
@@ -108,12 +137,14 @@ export default function SignInPage() {
 
               <div className="relative">
                 <input
+                  id="password"
                   type={showPassword ? "text" : "password"}
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="Enter your password"
                   required
+                  autoComplete="current-password"
                   className="w-full px-4 py-3 pr-12 rounded-xl border border-[#EAE4EF] bg-white text-[#30213D] outline-none focus:ring-2 focus:ring-[#8B78B5] focus:border-transparent"
                 />
 
@@ -121,9 +152,15 @@ export default function SignInPage() {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-[#64748B] hover:text-[#8B78B5]"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-label={
+                    showPassword ? "Hide password" : "Show password"
+                  }
                 >
-                  {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
+                  {showPassword ? (
+                    <EyeOff size={19} />
+                  ) : (
+                    <Eye size={19} />
+                  )}
                 </button>
               </div>
             </div>
