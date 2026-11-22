@@ -31,7 +31,9 @@ const formatDate = (date) => {
 
   const parsedDate = new Date(date);
 
-  if (Number.isNaN(parsedDate.getTime())) return "Date unavailable";
+  if (Number.isNaN(parsedDate.getTime())) {
+    return "Date unavailable";
+  }
 
   return parsedDate.toLocaleDateString("en-BD", {
     day: "numeric",
@@ -71,9 +73,6 @@ export default function MyApplicationsPage() {
         {
           method: "GET",
           credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
         }
       );
 
@@ -129,9 +128,7 @@ export default function MyApplicationsPage() {
       }
 
       setApplications((previous) =>
-        previous.filter(
-          (application) => application._id !== applicationId
-        )
+        previous.filter((application) => application._id !== applicationId)
       );
 
       setSuccessMessage("Your application has been cancelled successfully.");
@@ -174,7 +171,7 @@ export default function MyApplicationsPage() {
 
   return (
     <div className="space-y-7">
-      {/* Page heading */}
+      {/* Page Heading */}
       <section className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <div className="mb-2 flex items-center gap-2 text-sm text-[#95879F]">
@@ -225,7 +222,7 @@ export default function MyApplicationsPage() {
         </div>
       )}
 
-      {/* Application statistics */}
+      {/* Application Statistics */}
       <section className="grid grid-cols-2 gap-4 xl:grid-cols-4">
         {[
           {
@@ -278,7 +275,7 @@ export default function MyApplicationsPage() {
         })}
       </section>
 
-      {/* Application list */}
+      {/* Applications List */}
       <section className="overflow-hidden rounded-2xl border border-[#EAE4F0] bg-white">
         <div className="border-b border-[#F0ECF4] p-5 sm:p-6">
           <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
@@ -286,6 +283,7 @@ export default function MyApplicationsPage() {
               <h2 className="text-lg font-bold text-[#30213D]">
                 Application History
               </h2>
+
               <p className="mt-1 text-sm text-[#95879F]">
                 {applications.length} application
                 {applications.length === 1 ? "" : "s"} submitted
@@ -372,13 +370,23 @@ export default function MyApplicationsPage() {
                     </h3>
 
                     <div className="mt-4 grid gap-3 text-sm text-[#756B80] sm:grid-cols-2">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-start gap-2">
                         <FileText
                           size={16}
-                          className="shrink-0 text-[#A28CB9]"
+                          className="mt-0.5 shrink-0 text-[#A28CB9]"
                         />
                         <span className="break-all">
-                          Tutor: {application.tutorEmail || "Not available"}
+                          Tutor Name: {application.tutorName || "Not available"}
+                        </span>
+                      </div>
+
+                      <div className="flex items-start gap-2">
+                        <FileText
+                          size={16}
+                          className="mt-0.5 shrink-0 text-[#A28CB9]"
+                        />
+                        <span className="break-all">
+                          Tutor Email: {application.tutorEmail || "Not available"}
                         </span>
                       </div>
 
@@ -400,38 +408,34 @@ export default function MyApplicationsPage() {
                         </span>
                       </div>
 
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 sm:col-span-2">
                         <Clock
                           size={16}
                           className="shrink-0 text-[#A28CB9]"
                         />
                         <span className="break-words">
-                          {application.preferredSchedule || "Schedule not provided"}
+                          Preferred Schedule:{" "}
+                          {application.preferredSchedule || "Not provided"}
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex shrink-0 items-center gap-2 lg:flex-col lg:items-end">
-                    {application.status === "pending" && (
-                      <button
-                        type="button"
-                        onClick={() => handleCancel(application._id)}
-                        disabled={cancellingId === application._id}
-                        className="inline-flex items-center justify-center gap-2 rounded-xl border border-red-200 px-4 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        {cancellingId === application._id ? (
-                          <LoaderCircle
-                            size={16}
-                            className="animate-spin"
-                          />
-                        ) : (
-                          <Trash2 size={16} />
-                        )}
-                        Cancel Application
-                      </button>
-                    )}
-                  </div>
+                  {application.status === "pending" && (
+                    <button
+                      type="button"
+                      onClick={() => handleCancel(application._id)}
+                      disabled={cancellingId === application._id}
+                      className="inline-flex shrink-0 items-center justify-center gap-2 self-start rounded-xl border border-red-200 px-4 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {cancellingId === application._id ? (
+                        <LoaderCircle size={16} className="animate-spin" />
+                      ) : (
+                        <Trash2 size={16} />
+                      )}
+                      Cancel Application
+                    </button>
+                  )}
                 </div>
               </article>
             ))}

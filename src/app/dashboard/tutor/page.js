@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
@@ -55,14 +54,51 @@ export default function TutorDashboard() {
   }, [session]);
 
   useEffect(() => {
-    if (!sessionPending && session?.user) {
+    if (sessionPending) return;
+
+    if (session?.user) {
       fetchStats();
+    } else {
+      setLoading(false);
     }
   }, [sessionPending, session, fetchStats]);
 
   const isPro = stats?.plan === "pro";
   const tutorName =
     stats?.tutorName || session?.user?.name || "Tutor";
+
+  const statCards = [
+    {
+      label: "Total Tuitions Posted",
+      value: stats?.totalTuitions ?? 0,
+      description: "All your tuition listings",
+      icon: BookOpen,
+      color: "bg-[#F0EAF7] text-[#8066A8]",
+    },
+    {
+      label: "Active/Approved Tuitions",
+      value: stats?.activeTuitions ?? 0,
+      description: "Approved and active listings",
+      icon: CheckCircle2,
+      color: "bg-green-50 text-green-600",
+    },
+    {
+      label: "Total Applicants Received",
+      value: stats?.totalApplicants ?? 0,
+      description: "Students who applied to your tuitions",
+      icon: Users,
+      color: "bg-blue-50 text-blue-600",
+    },
+    {
+      label: "Current Plan",
+      value: stats?.plan === "pro" ? "Pro" : "Free",
+      description: isPro
+        ? "Tutor Pro membership"
+        : "Tutor Free membership",
+      icon: Crown,
+      color: "bg-amber-50 text-amber-600",
+    },
+  ];
 
   const quickActions = [
     {
@@ -72,13 +108,13 @@ export default function TutorDashboard() {
       icon: PlusCircle,
     },
     {
-      title: "Manage My Tuitions",
+      title: "My Tuitions",
       description: "Review and manage your existing tuition listings.",
       href: "/dashboard/tutor/my-tuitions",
       icon: ClipboardList,
     },
     {
-      title: "View Applicants",
+      title: "Applicants",
       description: "See students who have applied to your tuitions.",
       href: "/dashboard/tutor/applicants",
       icon: Users,
@@ -98,11 +134,10 @@ export default function TutorDashboard() {
 
   return (
     <div className="space-y-8">
-      {/* Welcome section */}
       <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#70558F] to-[#9B83BB] p-7 text-white shadow-sm sm:p-10">
         <div className="relative z-10 max-w-2xl">
           <p className="mb-3 text-sm font-medium text-white/80">
-            Tutor Workspace
+            Tutor Dashboard
           </p>
 
           <h1 className="text-2xl font-bold leading-tight sm:text-3xl lg:text-4xl">
@@ -129,11 +164,10 @@ export default function TutorDashboard() {
         />
       </section>
 
-      {/* Error notification */}
       {error && (
         <div className="flex flex-col gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2">
-            <AlertCircle size={19} className="shrink-0" />
+            <AlertCircle size={19} />
             {error}
           </div>
 
@@ -148,96 +182,29 @@ export default function TutorDashboard() {
         </div>
       )}
 
-      {/* Membership */}
-      <section className="flex flex-col justify-between gap-4 rounded-2xl border border-[#EAE4F0] bg-white p-5 sm:flex-row sm:items-center sm:p-6">
-        <div className="flex items-center gap-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#F0EAF7] text-[#8066A8]">
-            <Crown size={23} />
-          </div>
-
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-[#95879F]">
-              Your Membership
-            </p>
-            <h2 className="mt-1 text-lg font-bold text-[#30213D]">
-              {isPro ? "Tutor Pro" : "Free Tutor Plan"}
-            </h2>
-            <p className="mt-1 text-sm text-[#95879F]">
-              {isPro
-                ? "You can post unlimited tuition opportunities."
-                : "Your free plan allows up to 2 tuition listings."}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-3">
-          <span
-            className={`rounded-full px-4 py-2 text-xs font-bold ${
-              isPro
-                ? "bg-amber-100 text-amber-700"
-                : "bg-[#EEE8F5] text-[#70558F]"
-            }`}
-          >
-            {isPro ? "PRO MEMBER" : "FREE MEMBER"}
-          </span>
-
-          {!isPro && (
-            <Link
-              href="/pricing?role=tutor"
-              className="inline-flex items-center gap-2 rounded-xl bg-[#8066A8] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#70558F]"
-            >
-              Upgrade <ArrowRight size={15} />
-            </Link>
-          )}
-        </div>
-      </section>
-
-      {/* Statistics */}
       <section>
-        <div className="mb-4 flex items-center justify-between gap-3">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="text-xl font-bold text-[#30213D]">
-              Your Performance
+              Dashboard Overview
             </h2>
             <p className="mt-1 text-sm text-[#95879F]">
-              An overview of your teaching activity.
+              Your tuition, applicant and membership statistics.
             </p>
           </div>
 
           <button
             type="button"
             onClick={fetchStats}
-            className="rounded-lg p-2 text-[#8066A8] transition hover:bg-[#EEE8F5]"
-            aria-label="Refresh statistics"
+            className="inline-flex items-center gap-2 rounded-lg border border-[#EAE4F0] bg-white px-3 py-2 text-sm font-semibold text-[#8066A8] hover:bg-[#F7F4FA]"
           >
-            <RefreshCw size={18} />
+            <RefreshCw size={15} />
+            Refresh
           </button>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {[
-            {
-              label: "Total Tuitions Posted",
-              value: stats?.totalTuitions ?? 0,
-              icon: BookOpen,
-              color: "bg-[#F0EAF7] text-[#8066A8]",
-              description: "All your tuition listings",
-            },
-            {
-              label: "Active Tuitions",
-              value: stats?.activeTuitions ?? 0,
-              icon: CheckCircle2,
-              color: "bg-green-50 text-green-600",
-              description: "Approved and active listings",
-            },
-            {
-              label: "Total Applicants",
-              value: stats?.totalApplicants ?? 0,
-              icon: Users,
-              color: "bg-blue-50 text-blue-600",
-              description: "Students who applied",
-            },
-          ].map((item) => {
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {statCards.map((item) => {
             const Icon = item.icon;
 
             return (
@@ -245,7 +212,7 @@ export default function TutorDashboard() {
                 key={item.label}
                 className="rounded-2xl border border-[#EAE4F0] bg-white p-5 transition hover:shadow-md hover:shadow-[#70558F]/5"
               >
-                <div className="flex items-start justify-between">
+                <div className="flex items-start justify-between gap-2">
                   <div
                     className={`flex h-11 w-11 items-center justify-center rounded-xl ${item.color}`}
                   >
@@ -260,7 +227,8 @@ export default function TutorDashboard() {
                 <h3 className="mt-5 text-sm font-bold text-[#30213D]">
                   {item.label}
                 </h3>
-                <p className="mt-1 text-xs text-[#95879F]">
+
+                <p className="mt-1 text-xs leading-5 text-[#95879F]">
                   {item.description}
                 </p>
               </div>
@@ -269,7 +237,31 @@ export default function TutorDashboard() {
         </div>
       </section>
 
-      {/* Quick actions */}
+      {!isPro && (
+        <section className="flex flex-col justify-between gap-4 rounded-2xl border border-[#EAE4F0] bg-white p-5 sm:flex-row sm:items-center sm:p-6">
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+              <Crown size={21} />
+            </div>
+            <div>
+              <h2 className="font-bold text-[#30213D]">
+                Upgrade to Tutor Pro
+              </h2>
+              <p className="mt-1 text-sm text-[#95879F]">
+                Get unlimited tuition posts with Tutor Pro.
+              </p>
+            </div>
+          </div>
+
+          <Link
+            href="/pricing?role=tutor"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#8066A8] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#70558F]"
+          >
+            View Pro Plan <ArrowRight size={16} />
+          </Link>
+        </section>
+      )}
+
       <section>
         <div className="mb-4">
           <h2 className="text-xl font-bold text-[#30213D]">
@@ -311,7 +303,6 @@ export default function TutorDashboard() {
         </div>
       </section>
 
-      {/* Getting started */}
       <section className="rounded-2xl border border-[#EAE4F0] bg-white p-5 sm:p-6">
         <div className="flex items-start gap-4">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#F0EAF7] text-[#8066A8]">
