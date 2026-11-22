@@ -12,6 +12,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import Navbar from "@/components/shared/Navbar";
+import Footer from "@/components/shared/Footer";
 
 const benefits = [
   {
@@ -186,7 +187,7 @@ export default function HomePage() {
         </section>
 
         {/* How It Works */}
-        <section className="py-20 lg:py-24 bg-white">
+        <section id="how-it-works" className="py-20 lg:py-24 bg-white">
           <div className="max-w-7xl mx-auto px-5 lg:px-8">
             <div className="text-center max-w-2xl mx-auto mb-14">
               <p className="text-[#8B78B5] font-semibold text-sm mb-3">
@@ -253,7 +254,7 @@ export default function HomePage() {
         </section>
       </main>
 
-      
+      <Footer />
     </>
   );
 }
