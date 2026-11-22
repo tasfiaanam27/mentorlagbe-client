@@ -19,6 +19,22 @@ export default function SignInPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const getSafeRedirectPath = () => {
+    const params = new URLSearchParams(window.location.search);
+    const callbackURL = params.get("callbackURL");
+
+    if (
+      callbackURL &&
+      callbackURL.startsWith("/") &&
+      !callbackURL.startsWith("//") &&
+      !callbackURL.includes("\\")
+    ) {
+      return callbackURL;
+    }
+
+    return "/";
+  };
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -37,9 +53,13 @@ export default function SignInPage() {
     setLoading(true);
 
     try {
+      // Determine the intended destination before signing in.
+      const redirectPath = getSafeRedirectPath();
+
       const result = await authClient.signIn.email({
         email: formData.email.trim(),
         password: formData.password,
+        callbackURL: redirectPath,
       });
 
       if (result.error) {
@@ -49,7 +69,6 @@ export default function SignInPage() {
         return;
       }
 
-      // Confirm that the authenticated session is available.
       const sessionResult = await authClient.getSession();
       const user = sessionResult.data?.user;
 
@@ -58,18 +77,19 @@ export default function SignInPage() {
         return;
       }
 
-      // Ensure the account has a valid MentorLagbe role.
       const validRoles = ["student", "tutor", "admin"];
 
       if (!validRoles.includes(user.role)) {
-        toast.error("Your account role is invalid. Please contact support.");
+        toast.error(
+          "Your account role is invalid. Please contact support."
+        );
         return;
       }
 
       toast.success("Welcome back!");
 
-      // Successful sign-in takes the user to the public homepage.
-      router.replace("/");
+      // Navigate to the original destination.
+      router.replace(redirectPath);
       router.refresh();
     } catch (error) {
       toast.error(error.message || "Something went wrong.");
