@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
@@ -17,8 +18,7 @@ import {
   GraduationCap,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+import { apiFetch } from "@/lib/api";
 
 export default function TutorDashboard() {
   const { data: session, isPending: sessionPending } =
@@ -35,8 +35,8 @@ export default function TutorDashboard() {
       setLoading(true);
       setError("");
 
-      const response = await fetch(`${API_URL}/api/dashboard/tutor`, {
-        credentials: "include",
+      const response = await apiFetch("/api/dashboard/tutor", {
+        method: "GET",
       });
 
       const result = await response.json();

@@ -24,8 +24,7 @@ import {
 import Link from "next/link";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+import { apiFetch } from "@/lib/api";
 
 const initialEditForm = {
   title: "",
@@ -126,7 +125,7 @@ export default function MyTuitionsPage() {
         setLoading(true);
       }
 
-      const response = await fetch(`${API_URL}/api/tutor/tuitions`, {
+      const response = await apiFetch("/api/tutor/tuitions", {
         method: "GET",
         credentials: "include",
         cache: "no-store",
@@ -299,8 +298,8 @@ export default function MyTuitionsPage() {
         payload.bannerImage = await convertImageToBase64(newBanner);
       }
 
-      const response = await fetch(
-        `${API_URL}/api/tutor/tuitions/${editingTuition._id}`,
+      const response = await apiFetch(
+        `/api/tutor/tuitions/${editingTuition._id}`,
         {
           method: "PATCH",
           credentials: "include",
@@ -341,8 +340,8 @@ export default function MyTuitionsPage() {
     try {
       setTogglingId(tuition._id);
 
-      const response = await fetch(
-        `${API_URL}/api/tutor/tuitions/${tuition._id}`,
+      const response = await apiFetch(
+        `/api/tutor/tuitions/${tuition._id}`,
         {
           method: "PATCH",
           credentials: "include",
@@ -392,8 +391,8 @@ export default function MyTuitionsPage() {
     try {
       setDeletingId(tuition._id);
 
-      const response = await fetch(
-        `${API_URL}/api/tutor/tuitions/${tuition._id}`,
+      const response = await apiFetch(
+        `/api/tutor/tuitions/${tuition._id}`,
         {
           method: "DELETE",
           credentials: "include",

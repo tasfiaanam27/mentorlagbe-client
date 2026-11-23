@@ -22,8 +22,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+import { apiFetch } from "@/lib/api";
 
 function formatDate(date) {
   if (!date) return "—";
@@ -78,7 +77,7 @@ export default function TutorApplicantsPage() {
         setLoading(true);
       }
 
-      const response = await fetch(`${API_URL}/api/tutor-applicants`, {
+      const response = await apiFetch("/api/tutor-applicants", {
         method: "GET",
         credentials: "include",
         cache: "no-store",
@@ -118,8 +117,8 @@ export default function TutorApplicantsPage() {
     try {
       setUpdatingId(application._id);
 
-      const response = await fetch(
-        `${API_URL}/api/tutor-applicants/${application._id}`,
+      const response = await apiFetch(
+        `/api/tutor-applicants/${application._id}`,
         {
           method: "PATCH",
           credentials: "include",
@@ -410,7 +409,6 @@ export default function TutorApplicantsPage() {
 
                 {/* Application details */}
                 <div className="grid gap-5 py-5 md:grid-cols-2">
-
                   <div className="space-y-4">
                     <div>
                       <p className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-[#A69AAF]">
