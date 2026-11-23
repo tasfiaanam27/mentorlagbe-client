@@ -17,6 +17,7 @@ import {
 import Navbar from "@/components/shared/Navbar";
 import Footer from "@/components/shared/Footer";
 import { authClient } from "@/lib/auth-client";
+import { apiFetch } from "@/lib/api";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -91,12 +92,11 @@ export default function TuitionDetailsPage() {
     try {
       setSubmitting(true);
 
-      const response = await fetch(`${API_URL}/api/applications`, {
+      const response = await apiFetch("/api/applications", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include",
         body: JSON.stringify({
           tuitionId,
           studentPhone,
@@ -367,7 +367,10 @@ export default function TuitionDetailsPage() {
                           </p>
                         </div>
                       ) : (
-                        <form onSubmit={handleApplication} className="mt-5 space-y-4">
+                        <form
+                          onSubmit={handleApplication}
+                          className="mt-5 space-y-4"
+                        >
                           <div>
                             <label
                               htmlFor="studentPhone"
@@ -471,3 +474,4 @@ export default function TuitionDetailsPage() {
     </>
   );
 }
+
