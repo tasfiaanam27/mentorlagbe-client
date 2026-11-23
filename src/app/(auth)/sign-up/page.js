@@ -24,6 +24,7 @@ export default function SignUpPage() {
 
   // Safely retrieve the intended destination.
   const getSafeRedirectPath = () => {
+    if (typeof window === "undefined") return "/";
     const params = new URLSearchParams(window.location.search);
     const callbackURL = params.get("callbackURL");
 
