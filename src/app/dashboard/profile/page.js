@@ -246,11 +246,15 @@ export default function ProfilePage() {
   }
 
   const currentRole = profile?.role || session.user.role;
-  const currentPlan = profile?.plan || "free";
+  const isAdmin = currentRole === "admin";
+
+  // Admin accounts do not have a subscription plan.
+  const currentPlan = isAdmin
+    ? "Admin Account"
+    : `${profile?.plan || "free"} Plan`;
 
   return (
     <div className="mx-auto max-w-5xl space-y-7">
-
       {/* Page heading */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
@@ -305,6 +309,7 @@ export default function ProfilePage() {
                 <h2 className="break-words text-xl font-bold text-[#30213D]">
                   {name || profile?.name || "Your Name"}
                 </h2>
+
                 <p className="mt-1 break-all text-sm text-[#887D92]">
                   {profile?.email || session.user.email}
                 </p>
@@ -314,10 +319,19 @@ export default function ProfilePage() {
             <div className="flex flex-wrap gap-2 pb-1">
               <RoleBadge role={currentRole} />
 
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FAF3E5] px-3 py-1 text-xs font-semibold capitalize text-[#9A6B1C]">
-                <Crown size={13} />
-                {currentPlan} Plan
-              </span>
+              {!isAdmin && (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FAF3E5] px-3 py-1 text-xs font-semibold capitalize text-[#9A6B1C]">
+                  <Crown size={13} />
+                  {currentPlan}
+                </span>
+              )}
+
+              {isAdmin && (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
+                  <ShieldCheck size={13} />
+                  Admin Account
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -325,7 +339,6 @@ export default function ProfilePage() {
 
       {/* Edit profile form */}
       <form onSubmit={handleSubmit} className="space-y-6">
-
         {/* Personal information */}
         <section className="rounded-2xl border border-[#EAE4F0] bg-white p-5 shadow-sm sm:p-7">
           <div className="mb-6">
@@ -550,7 +563,7 @@ export default function ProfilePage() {
               Account Information
             </h2>
             <p className="mt-1 text-sm text-[#95879F]">
-              Your current platform role and subscription plan.
+              Your current platform role and account status.
             </p>
           </div>
 
@@ -563,15 +576,27 @@ export default function ProfilePage() {
               <RoleBadge role={currentRole} />
             </div>
 
-            <div className="rounded-xl bg-[#FAF8FC] p-4">
-              <p className="mb-2 flex items-center gap-2 text-xs font-semibold text-[#95879F]">
-                <Crown size={15} />
-                Subscription Plan
-              </p>
-              <span className="text-sm font-bold capitalize text-[#493B56]">
-                {currentPlan} Plan
-              </span>
-            </div>
+            {isAdmin ? (
+              <div className="rounded-xl bg-[#FAF8FC] p-4">
+                <p className="mb-2 flex items-center gap-2 text-xs font-semibold text-[#95879F]">
+                  <ShieldCheck size={15} />
+                  Account Type
+                </p>
+                <span className="text-sm font-bold text-[#493B56]">
+                  Admin Account
+                </span>
+              </div>
+            ) : (
+              <div className="rounded-xl bg-[#FAF8FC] p-4">
+                <p className="mb-2 flex items-center gap-2 text-xs font-semibold text-[#95879F]">
+                  <Crown size={15} />
+                  Subscription Plan
+                </p>
+                <span className="text-sm font-bold capitalize text-[#493B56]">
+                  {currentPlan}
+                </span>
+              </div>
+            )}
           </div>
 
           <div className="mt-4 flex items-start gap-2 rounded-xl border border-[#E8E1EF] bg-[#F9F7FB] p-3">
@@ -580,7 +605,7 @@ export default function ProfilePage() {
               className="mt-0.5 shrink-0 text-[#8066A8]"
             />
             <p className="text-xs leading-5 text-[#756B80]">
-              Your role and subscription plan are managed by the platform.
+              Your role and account status are managed by the platform.
               Contact an administrator if your account role needs to change.
             </p>
           </div>
@@ -619,3 +644,4 @@ export default function ProfilePage() {
     </div>
   );
 }
+

@@ -46,7 +46,10 @@ export default function Navbar() {
 
   const user = session?.user;
   const role = user?.role || "student";
-  const isPro = user?.plan === "pro";
+
+  // Admin accounts do not have subscription plans.
+  const isAdmin = role === "admin";
+  const isPro = !isAdmin && user?.plan === "pro";
 
   const roleLabel = {
     student: "Student",
@@ -82,7 +85,8 @@ export default function Navbar() {
   };
 
   const ProfileAvatar = ({ size = "normal" }) => {
-    const dimension = size === "small" ? "w-9 h-9" : "w-10 h-10";
+    const dimension =
+      size === "small" ? "w-9 h-9" : "w-10 h-10";
 
     return (
       <div
@@ -143,8 +147,10 @@ export default function Navbar() {
                     <p className="text-sm font-semibold text-[#30213D] max-w-28 truncate">
                       {user.name}
                     </p>
-                    {isPro && <ProBadge />}
+
+                    {!isAdmin && isPro && <ProBadge />}
                   </div>
+
                   <span className="text-xs text-[#8B78B5] font-medium">
                     {roleLabel[role] || "Student"}
                   </span>
@@ -165,27 +171,34 @@ export default function Navbar() {
                       <p className="font-semibold text-sm text-[#30213D] truncate">
                         {user.name}
                       </p>
-                      {isPro && <ProBadge />}
+
+                      {!isAdmin && isPro && <ProBadge />}
                     </div>
 
                     <p className="text-xs text-[#64748B] truncate mt-1">
                       {user.email}
                     </p>
 
-                    <div className="flex items-center gap-2 mt-2">
+                    <div className="flex flex-wrap items-center gap-2 mt-2">
                       <span className="inline-block px-2.5 py-1 rounded-full bg-[#F3EFF9] text-[#75619E] text-xs font-semibold">
                         {roleLabel[role] || "Student"}
                       </span>
 
-                      <span
-                        className={`inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${
-                          isPro
-                            ? "bg-[#F3EFF9] text-[#75619E]"
-                            : "bg-gray-100 text-gray-600"
-                        }`}
-                      >
-                        {isPro ? "Pro Plan" : "Free Plan"}
-                      </span>
+                      {isAdmin ? (
+                        <span className="inline-block px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 text-xs font-semibold">
+                          Admin Account
+                        </span>
+                      ) : (
+                        <span
+                          className={`inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${
+                            isPro
+                              ? "bg-[#F3EFF9] text-[#75619E]"
+                              : "bg-gray-100 text-gray-600"
+                          }`}
+                        >
+                          {isPro ? "Pro Plan" : "Free Plan"}
+                        </span>
+                      )}
                     </div>
                   </div>
 
@@ -278,16 +291,24 @@ export default function Navbar() {
                       <p className="text-sm font-semibold text-[#30213D] truncate">
                         {user.name}
                       </p>
-                      {isPro && <ProBadge />}
+
+                      {!isAdmin && isPro && <ProBadge />}
                     </div>
 
-                    <div className="flex items-center gap-2 mt-1">
+                    <div className="flex flex-wrap items-center gap-2 mt-1">
                       <span className="text-xs text-[#8B78B5] font-medium">
                         {roleLabel[role] || "Student"}
                       </span>
-                      <span className="text-xs text-[#64748B]">
-                        · {isPro ? "Pro Plan" : "Free Plan"}
-                      </span>
+
+                      {isAdmin ? (
+                        <span className="text-xs font-semibold text-amber-700">
+                          · Admin Account
+                        </span>
+                      ) : (
+                        <span className="text-xs text-[#64748B]">
+                          · {isPro ? "Pro Plan" : "Free Plan"}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -345,4 +366,3 @@ export default function Navbar() {
     </header>
   );
 }
-
