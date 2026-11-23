@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -21,8 +22,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+import { apiFetch } from "@/lib/api";
 
 function formatDate(date) {
   if (!date) return "—";
@@ -80,7 +80,7 @@ export default function AdminTuitionsPage() {
         setLoading(true);
       }
 
-      const response = await fetch(`${API_URL}/api/admin/tuitions`, {
+      const response = await apiFetch("/api/admin/tuitions", {
         method: "GET",
         credentials: "include",
         cache: "no-store",
@@ -161,8 +161,8 @@ export default function AdminTuitionsPage() {
     try {
       setUpdatingId(tuition._id);
 
-      const response = await fetch(
-        `${API_URL}/api/admin/tuitions/${tuition._id}/approval`,
+      const response = await apiFetch(
+        `/api/admin/tuitions/${tuition._id}/approval`,
         {
           method: "PATCH",
           credentials: "include",

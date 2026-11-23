@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -19,8 +20,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+import { apiFetch } from "@/lib/api";
 
 const ROLES = ["student", "tutor", "admin"];
 
@@ -81,7 +81,7 @@ export default function AdminUsersPage() {
         setLoading(true);
       }
 
-      const response = await fetch(`${API_URL}/api/admin/users`, {
+      const response = await apiFetch("/api/admin/users", {
         method: "GET",
         credentials: "include",
         cache: "no-store",
@@ -147,8 +147,8 @@ export default function AdminUsersPage() {
     try {
       setUpdatingId(user._id);
 
-      const response = await fetch(
-        `${API_URL}/api/admin/users/${user._id}/role`,
+      const response = await apiFetch(
+        `/api/admin/users/${user._id}/role`,
         {
           method: "PATCH",
           credentials: "include",

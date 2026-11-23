@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
@@ -18,8 +19,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+import { apiFetch } from "@/lib/api";
 
 function formatMoney(amount, currency) {
   try {
@@ -48,7 +48,7 @@ export default function AdminDashboardPage() {
         setLoading(true);
       }
 
-      const response = await fetch(`${API_URL}/api/admin/overview`, {
+      const response = await apiFetch("/api/admin/overview", {
         method: "GET",
         credentials: "include",
         cache: "no-store",
